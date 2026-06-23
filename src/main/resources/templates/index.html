@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill Splitter 💰 - Group Trip Expense Manager</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 { font-size: 2.5rem; margin-bottom: 8px; }
+        .header p { font-size: 1.1rem; opacity: 0.9; }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        input, select {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e8e8e8;
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus { border-color: #667eea; }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102,126,234,0.4); }
+
+        .btn-danger { background: #ff6b6b; color: white; padding: 8px 14px; font-size: 0.85rem; }
+        .btn-success { background: #51cf66; color: white; width: 100%; padding: 16px; font-size: 1.1rem; border-radius: 14px; margin-top: 10px; }
+        .btn-success:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(81,207,102,0.4); }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #f0f0ff;
+            color: #667eea;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin: 4px;
+        }
+
+        .tag button {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0;
+        }
+
+        #membersContainer { min-height: 40px; }
+
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: #f8f9ff;
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+
+        .expense-info { flex: 1; }
+        .expense-desc { font-weight: 600; color: #333; }
+        .expense-meta { font-size: 0.85rem; color: #888; margin-top: 2px; }
+        .expense-amount { font-weight: 700; color: #667eea; font-size: 1.1rem; margin: 0 16px; }
+
+        .results-card { display: none; }
+
+        .settlement-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: linear-gradient(135deg, #fff5f5, #fff);
+            border: 2px solid #ffe0e0;
+            border-radius: 14px;
+            margin-bottom: 12px;
+        }
+
+        .settlement-item .arrow { font-size: 1.5rem; margin: 0 16px; }
+
+        .person-name {
+            font-weight: 700;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .pays { color: #ff6b6b; font-size: 0.8rem; }
+        .receives { color: #51cf66; font-size: 0.8rem; }
+
+        .amount-badge {
+            margin-left: auto;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 16px;
+            background: #f8f9ff;
+            border-radius: 14px;
+        }
+
+        .stat-box .value { font-size: 1.5rem; font-weight: 700; color: #667eea; }
+        .stat-box .label { font-size: 0.8rem; color: #888; margin-top: 4px; }
+
+        .all-clear {
+            text-align: center;
+            padding: 30px;
+            color: #51cf66;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .whatsapp-btn {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .whatsapp-btn:hover { background: #20bd5a; }
+
+        .section-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin: 20px 0 12px;
+        }
+
+        .loader { display: none; text-align: center; padding: 20px; color: #667eea; }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <div class="header">
+        <h1>💰 Bill Splitter</h1>
+        <p>Group trip expenses settled in seconds</p>
+    </div>
+
+    <!-- Step 1: Group Setup -->
+    <div class="card">
+        <h2> Group Setup</h2>
+
+        <input type="text" id="groupName" placeholder="Trip name (e.g. Goa Trip )" style="width:100%; margin-bottom:16px;" />
+
+        <div class="input-row">
+            <input type="text" id="memberInput" placeholder="Add member name..." onkeypress="if(event.key==='Enter') addMember()" />
+            <button class="btn btn-primary" onclick="addMember()">Add</button>
+        </div>
+
+        <div id="membersContainer"></div>
+    </div>
+
+    <!-- Step 2: Add Expenses -->
+    <div class="card">
+        <h2> Add Expenses</h2>
+
+        <div class="input-row">
+            <input type="text" id="expDesc" placeholder="What was it? (e.g. Hotel)" style="flex:2" />
+            <input type="number" id="expAmount" placeholder="₹ Amount" />
+        </div>
+
+        <div class="input-row">
+            <select id="expPaidBy">
+                <option value="">Who paid?</option>
+            </select>
+            <button class="btn btn-primary" onclick="addExpense()">Add Expense</button>
+        </div>
+
+        <div id="expensesContainer"></div>
+    </div>
+
+    <!-- Calculate Button -->
+    <button class="btn btn-success" onclick="calculate()">
+         Calculate & Split
+    </button>
+
+    <div class="loader" id="loader">Calculating... ⏳</div>
+
+    <!-- Results -->
+    <div class="card results-card" id="resultsCard">
+        <h2> Settlement Summary</h2>
+
+        <div class="stats" id="statsContainer"></div>
+
+        <div class="section-title">Who Pays Whom</div>
+        <div id="settlementsContainer"></div>
+
+        <button class="whatsapp-btn" onclick="shareOnWhatsApp()">
+             Share on WhatsApp
+        </button>
+    </div>
+
+</div>
+
+<script>
+    let members = [];
+    let expenses = [];
+
+    function addMember() {
+        const input = document.getElementById('memberInput');
+        const name = input.value.trim();
+        if (!name || members.includes(name))
+         { 
+         input.value = ''; 
+         return;    
+         }
+
+        members.push(name);
+        input.value = '';
+        renderMembers();
+        updateMembersDropdown();
+    }
+
+    function removeMember(name) {
+        members = members.filter(m => m !== name);
+        expenses = expenses.filter(e => e.paidBy !== name);
+        renderMembers();
+        updateMembersDropdown();
+        renderExpenses();
+    }
+
+    function renderMembers() {
+        const container = document.getElementById('membersContainer');
+        container.innerHTML = members.map(m => `
+            <span class="tag">👤 ${m} <button onclick="removeMember('${m}')">×</button></span>
+        `).join('');
+    }
+
+    function updateMembersDropdown() {
+        const select = document.getElementById('expPaidBy');
+        const current = select.value;
+        select.innerHTML = '<option value="">Who paid?</option>' +
+            members.map(m => `<option value="${m}" ${m === current ? 'selected' : ''}>${m}</option>`).join('');
+    }
+
+    function addExpense() {
+        const desc = document.getElementById('expDesc').value.trim();
+        const amount = parseFloat(document.getElementById('expAmount').value);
+        const paidBy = document.getElementById('expPaidBy').value;
+
+        if (!desc || !amount || !paidBy) {
+            alert('Please fill all expense fields!');
+            return;
+        }
+
+        expenses.push({ description: desc, amount, paidBy });
+        document.getElementById('expDesc').value = '';
+        document.getElementById('expAmount').value = '';
+        renderExpenses();
+    }
+
+    function removeExpense(index) {
+        expenses.splice(index, 1);
+        renderExpenses();
+    }
+
+    function renderExpenses() {
+        const container = document.getElementById('expensesContainer');
+        if (expenses.length === 0) { container.innerHTML = ''; return; }
+
+        container.innerHTML = '<div class="section-title">Expenses Added</div>' +
+            expenses.map((e, i) => `
+                <div class="expense-item">
+                    <div class="expense-info">
+                        <div class="expense-desc">${e.description}</div>
+                        <div class="expense-meta">Paid by ${e.paidBy}</div>
+                    </div>
+                    <div class="expense-amount">₹${e.amount.toLocaleString()}</div>
+                    <button class="btn btn-danger" onclick="removeExpense(${i})">✕</button>
+                </div>
+            `).join('');
+    }
+
+    async function calculate() {
+        if (members.length < 2) { alert('Add at least 2 members!'); return; }
+        if (expenses.length === 0) { alert('Add at least one expense!'); return; }
+
+        document.getElementById('loader').style.display = 'block';
+        document.getElementById('resultsCard').style.display = 'none';
+
+        const groupName = document.getElementById('groupName').value || 'Group Trip';
+        const payload = { groupName, members, expenses };
+
+        try {
+            const res = await fetch('/api/calculate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+            document.getElementById('loader').style.display = 'none';
+            renderResults(data);
+        } catch (err) {
+            document.getElementById('loader').style.display = 'none';
+            alert('Something went wrong. Please try again.');
+        }
+    }
+
+    function renderResults(data) {
+        const card = document.getElementById('resultsCard');
+        card.style.display = 'block';
+        card.scrollIntoView({ behavior: 'smooth' });
+
+        // Stats
+        document.getElementById('statsContainer').innerHTML = `
+            <div class="stat-box">
+                <div class="value">₹${data.totalAmount.toLocaleString()}</div>
+                <div class="label">Total Spent</div>
+            </div>
+            <div class="stat-box">
+                <div class="value">${members.length}</div>
+                <div class="label">Members</div>
+            </div>
+            <div class="stat-box">
+                <div class="value">₹${Math.round(data.perPerson).toLocaleString()}</div>
+                <div class="label">Per Person</div>
+            </div>
+        `;
+
+        // Settlements
+        const container = document.getElementById('settlementsContainer');
+        if (data.settlements.length === 0) {
+            container.innerHTML = '<div class="all-clear">🎉 Everyone is settled! No payments needed.</div>';
+        } else {
+            container.innerHTML = data.settlements.map(s => `
+                <div class="settlement-item">
+                    <div>
+                        <div class="person-name">${s.from}</div>
+                        <div class="pays">pays</div>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div>
+                        <div class="person-name">${s.to}</div>
+                        <div class="receives">receives</div>
+                    </div>
+                    <div class="amount-badge">₹${s.amount.toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+    }
+
+    function shareOnWhatsApp() {
+        const groupName = document.getElementById('groupName').value || 'Group Trip';
+        let message = `💰 *${groupName} - Bill Settlement*\n\n`;
+
+        const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
+        message += `📊 Total: ₹${totalSpent.toLocaleString()}\n`;
+        message += `👥 Members: ${members.join(', ')}\n\n`;
+        message += `*Who Pays Whom:*\n`;
+
+        const items = document.querySelectorAll('.settlement-item');
+        if (items.length === 0) {
+            message += '✅ Everyone is settled!';
+        } else {
+            items.forEach(item => {
+                const names = item.querySelectorAll('.person-name');
+                const amount = item.querySelector('.amount-badge').textContent;
+                message += `• ${names[0].textContent} → ${names[1].textContent}: ${amount}\n`;
+            });
+        }
+
+        message += `\n_Calculated using Bill Splitter 💰_`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`);
+    }
+</script>
+</body>
+</html>
